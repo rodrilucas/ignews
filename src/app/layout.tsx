@@ -1,5 +1,6 @@
 import { Roboto } from "next/font/google";
 import "@/styles/global.scss";
+import SessionWrapper from "@/components/SessionWrapper";
 
 const roboto = Roboto({
   variable: "--font-roboto",
@@ -17,7 +18,9 @@ export default function RootLayout({
       <head>
         <link rel="shortcut icon" href="/favicon.png" type="image/png" />
       </head>
-      <body className={`${roboto.className}`}>{children}</body>
+      <body className={`${roboto.variable}`}>
+        <SessionWrapper>{children}</SessionWrapper>
+      </body>
     </html>
   );
 }
