@@ -1,10 +1,15 @@
 import styles from "./home.module.scss";
 import Header from "@/components/Header";
-import { Fragment } from "react";
 import Image from "next/image";
+import { Fragment } from "react";
 import { SubscribeButton } from "@/components/SubscribeButton";
+import { loadFormattedProduct } from "@/services/load-formatted-product";
 
-export default function Home() {
+export const revalidate = 60 * 60 * 24;
+
+export default async function Home() {
+  const product = await loadFormattedProduct("price_1Rig7EB6psMdNg5F2x0CzYJg");
+
   return (
     <Fragment>
       <Header />
@@ -16,9 +21,9 @@ export default function Home() {
           </h1>
           <p>
             Get access to all the publications <br />
-            <span>for $9.99 month</span>
+            <span>for ${product.amount} month</span>
           </p>
-          <SubscribeButton />
+          <SubscribeButton priceId={product.priceId}/>
         </section>
         <Image
           src={"/images/avatar.svg"}
