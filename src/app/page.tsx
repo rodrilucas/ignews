@@ -4,11 +4,12 @@ import Image from "next/image";
 import { Fragment } from "react";
 import { SubscribeButton } from "@/components/SubscribeButton";
 import { loadFormattedProduct } from "@/services/load-formatted-product";
+import { env } from "@/env/env.server";
 
 export const revalidate = 60 * 60 * 24;
 
 export default async function Home() {
-  const product = await loadFormattedProduct("price_1Rig7EB6psMdNg5F2x0CzYJg");
+  const product = await loadFormattedProduct(env.STRIPE_PRICE);
 
   return (
     <Fragment>
@@ -23,7 +24,7 @@ export default async function Home() {
             Get access to all the publications <br />
             <span>for ${product.amount} month</span>
           </p>
-          <SubscribeButton priceId={product.priceId}/>
+          <SubscribeButton priceId={product.priceId} />
         </section>
         <Image
           src={"/images/avatar.svg"}

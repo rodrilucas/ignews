@@ -1,4 +1,4 @@
-import { getProductById } from "@/stripe/get-product-by-id";
+import { getProductById } from "./stripe/get-product-by-id";
 
 export async function loadFormattedProduct(priceId: string) {
   const price = await getProductById(priceId);
