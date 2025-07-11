@@ -1,6 +1,8 @@
 import z from "zod";
 
 const envSchema = z.object({
+  NODE_ENV: z.string(),
+
   GITHUB_SECRET: z.string(),
   GITHUB_ID: z.string(),
 
@@ -8,6 +10,7 @@ const envSchema = z.object({
   STRIPE_SUCCESS_URL: z.string(),
   STRIPE_CANCEL_URL: z.string(),
   STRIPE_PRICE: z.coerce.string(),
+  STRIPE_WEBHOOK_SECRET: z.string(),
 
   AUTH_SECRET: z.string(),
 
@@ -17,6 +20,8 @@ const envSchema = z.object({
   FIREBASE_AUTH_DOMAIN: z.string(),
   FIREBASE_STORAGE_BUCKET: z.string(),
   FIREBASE_PROJECT_ID: z.string(),
+
+  PRISMIC_ACCESS_TOKEN: z.string()
 });
 
 const _env = envSchema.safeParse(process.env);
