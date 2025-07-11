@@ -2,6 +2,7 @@ import type { NextAuthOptions } from "next-auth";
 import GitHubProvider from "next-auth/providers/github";
 import { env } from "@/env/env.server";
 import { add } from "@/services/add";
+import { makeFirebaseUserRepository } from "@/services/factories/make-firebase-user-repository";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,10 +18,35 @@ export const authOptions: NextAuthOptions = {
   ],
   secret: env.AUTH_SECRET,
   callbacks: {
+    async session({ session }) {
+      const userFirebaseRepository = makeFirebaseUserRepository();
+
+      if (!session.user || !session.user.email) {
+        throw new Error("Usuário não autenticado ou email não encontrado..");
+      }
+
+      const subscription =
+        await userFirebaseRepository.findUserWithActiveSubscription({
+          field: "email",
+          value: session.user.email,
+        });
+
+      if (subscription) {
+        return {
+          ...session,
+          subscription,
+        };
+      } else {
+        return {
+          ...session,
+        };
+      }
+    },
     async signIn({ user }) {
       if (!user || !user.email) {
-        return false;
+        throw new Error("Usuário não existe ou email não encontrado.");
       }
+
       try {
         await add({
           data: {
@@ -28,8 +54,8 @@ export const authOptions: NextAuthOptions = {
           },
         });
         return true;
-      } catch {
-        return false;
+      } catch (err) {
+        throw err;
       }
     },
   },
