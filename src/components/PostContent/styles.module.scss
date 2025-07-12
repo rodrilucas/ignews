@@ -1,0 +1,36 @@
+@use "@/styles/variables" as *;
+
+.content {
+  margin-top: 2rem;
+  line-height: 2rem;
+  font-size: 1.125rem;
+  color: $gray-300;
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    color: $white-900;
+  }
+
+  p,
+  ul {
+    margin: 1.5rem 0;
+  }
+
+  ul {
+    padding-left: 1.5rem;
+
+    li {
+      margin: 0.5rem 0;
+    }
+  }
+
+  &.preview {
+    background: linear-gradient($gray-50, transparent);
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+}

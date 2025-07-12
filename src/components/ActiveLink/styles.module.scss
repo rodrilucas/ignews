@@ -1,0 +1,36 @@
+@use "@/styles/variables" as *;
+
+.link {
+  display: inline-block;
+  position: relative;
+  padding: 0 0.5rem;
+  height: 5rem;
+  line-height: 5rem;
+  color: $gray-300;
+
+  transition: color 0.2s;
+
+  & + a {
+    margin-left: 2rem;
+  }
+
+  &:hover {
+    color: $white-900;
+  }
+
+  &.active {
+    color: $white-900;
+    font-weight: 900;
+  }
+
+  &.active::after {
+    content: "";
+    height: 3px;
+    border-radius: 3px 3px 0 0;
+    width: 100%;
+    position: absolute;
+    bottom: 1px;
+    left: 0;
+    background: $yellow-500;
+  }
+}

@@ -1,0 +1,21 @@
+@use "@/styles/variables" as *;
+
+.reading {
+  padding: 2rem;
+  text-align: center;
+  background: $gray-850;
+  border-radius: 100px;
+  font-size: 1.25rem;
+  font-weight: bold;
+  max-width: 720px;
+  margin: 5rem auto 0;
+
+  span {
+    color: $yellow-500;
+    margin-left: 0.5rem;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
