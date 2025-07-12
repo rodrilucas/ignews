@@ -3,6 +3,7 @@ import GitHubProvider from "next-auth/providers/github";
 import { env } from "@/env/env.server";
 import { add } from "@/services/add";
 import { makeFirebaseUserRepository } from "@/services/factories/make-firebase-user-repository";
+import { Subscription } from "@/services/factories/make-firebase-subscription-repository";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -29,18 +30,14 @@ export const authOptions: NextAuthOptions = {
         await userFirebaseRepository.findUserWithActiveSubscription({
           field: "email",
           value: session.user.email,
-        });
+        }) as Subscription;
 
       if (subscription) {
-        return {
-          ...session,
-          subscription,
-        };
-      } else {
-        return {
-          ...session,
+        session.subscription = {
+          ...subscription,
         };
       }
+      return session;
     },
     async signIn({ user }) {
       if (!user || !user.email) {
