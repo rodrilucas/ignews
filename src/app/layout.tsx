@@ -1,4 +1,5 @@
 import { Roboto } from "next/font/google";
+import Header from "@/components/Header";
 import "@/styles/global.scss";
 import SessionWrapper from "@/components/SessionWrapper";
 
@@ -19,7 +20,10 @@ export default function RootLayout({
         <link rel="shortcut icon" href="/favicon.png" type="image/png" />
       </head>
       <body className={`${roboto.variable}`}>
-        <SessionWrapper>{children}</SessionWrapper>
+        <SessionWrapper>
+          <Header />
+          <main>{children}</main>
+        </SessionWrapper>
       </body>
     </html>
   );
