@@ -7,6 +7,6 @@ type User = {
   stripe_customer_id?: string;
 };
 
-export function makeFirebaseRepository() {
+export function makeFirebaseUserRepository() {
   return new FirebaseRepository<User>(db, "users");
 }
