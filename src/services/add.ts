@@ -1,4 +1,4 @@
-import { makeFirebaseRepository } from "./factories/make-firebase-repository";
+import { makeFirebaseUserRepository } from "./factories/make-firebase-user-repository";
 
 type Add = {
   data: {
@@ -7,13 +7,11 @@ type Add = {
 };
 
 export async function add({ data }: Add) {
-  const firebaseRepository = makeFirebaseRepository();
+  const firebaseRepository = makeFirebaseUserRepository();
 
   const user = await firebaseRepository.findUnique({
-    data: {
-      field: "email",
-      value: data.email,
-    },
+    field: "email",
+    value: data.email,
   });
 
   if (user) {
