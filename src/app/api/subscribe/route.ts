@@ -1,35 +1,29 @@
 import { stripe } from "@/lib/stripe";
 import { NextResponse } from "next/server";
 import { env } from "@/env/env.server";
+import { makeFirebaseUserRepository } from "@/services/factories/make-firebase-user-repository";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
-import { makeFirebaseRepository } from "@/services/factories/make-firebase-repository";
 
 export async function POST() {
   const session = await getServerSession(authOptions);
-  const firebaseRepository = makeFirebaseRepository();
+  const firebaseRepository = makeFirebaseUserRepository();
 
   if (!session || !session.user || !session.user.email) {
-    return NextResponse.json(
-      { error: "Usuário não autenticado." },
-      { status: 401 }
-    );
+    return NextResponse.json("Usuário não autenticado", { status: 401 });
   }
 
   const email = session.user.email;
 
   const user = await firebaseRepository.findUnique({
-    data: {
-      field: "email",
-      value: email,
-    },
+    field: "email",
+    value: email,
   });
 
   if (!user) {
-    return NextResponse.json(
-      { error: "Usuário não encontrado no banco de dados." },
-      { status: 404 }
-    );
+    return NextResponse.json("Usuário não encontrado no banco de dados", {
+      status: 404,
+    });
   }
 
   let stripeCustomerId = user.stripe_customer_id;
@@ -37,9 +31,9 @@ export async function POST() {
   if (!stripeCustomerId) {
     const customer = await stripe.customers.create({ email });
 
-    await firebaseRepository.update({
+    await firebaseRepository.updateOne({
+      id: user.id,
       data: {
-        id: user.id,
         stripe_customer_id: customer.id,
       },
     });
