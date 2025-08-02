@@ -1,4 +1,4 @@
-import { db } from "@/db";
+import { adminDb } from "@/lib/firebaseAdmin";
 import { FirebaseRepository } from "@/repositories/firebase/repository";
 import Stripe from "stripe";
 
@@ -11,5 +11,5 @@ export type Subscription = {
 };
 
 export function makeFirebaseSubscriptionRepository() {
-  return new FirebaseRepository<Subscription>(db, "subscriptions");
+  return new FirebaseRepository<Subscription>(adminDb, "subscriptions");
 }

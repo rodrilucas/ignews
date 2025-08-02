@@ -1,5 +1,5 @@
 import { FirebaseRepository } from "@/repositories/firebase/repository";
-import { db } from "@/db";
+import { adminDb } from "@/lib/firebaseAdmin";
 
 type User = {
   id: string;
@@ -8,5 +8,5 @@ type User = {
 };
 
 export function makeFirebaseUserRepository() {
-  return new FirebaseRepository<User>(db, "users");
+  return new FirebaseRepository<User>(adminDb, "users");
 }

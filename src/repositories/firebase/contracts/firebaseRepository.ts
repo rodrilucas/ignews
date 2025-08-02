@@ -26,7 +26,7 @@ export type FindUserWithActiveSubscription<T> = FindUnique<T>;
 export interface IFirebaseRepository<T extends Id> {
   create(data: Omit<T, "id">): Promise<void>;
   findUnique(params: FindUnique<T>): Promise<T | null>;
-  findMany(params: FindMany<T>): Promise<T[]>; 
+  findMany(params: FindMany<T>): Promise<T[]>;
   updateOne(params: UpdateOne<T>): Promise<boolean>;
   updateMany(params: UpdateMany<T>): Promise<boolean>;
   findUserWithActiveSubscription(

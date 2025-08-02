@@ -1,122 +1,100 @@
 import {
-  collection,
-  query,
-  where,
-  getDocs,
-  updateDoc,
-  doc,
-  writeBatch,
-  Firestore,
   CollectionReference,
-} from "firebase/firestore/lite";
-import type {
+  DocumentData,
+  Firestore,
+} from "firebase-admin/firestore";
+import {
   IFirebaseRepository,
   FindUnique,
   FindMany,
   UpdateOne,
   UpdateMany,
   FindUserWithActiveSubscription,
-} from ".";
-import { adminDb } from "@/lib/firebaseAdmin";
+} from "@/repositories/firebase/contracts/firebaseRepository";
 
 export class FirebaseRepository<T extends { id: string }>
   implements IFirebaseRepository<T>
 {
-  private readonly collectionRef: CollectionReference;
+  private readonly collectionRef: CollectionReference<DocumentData>;
 
   constructor(
     private readonly db: Firestore,
-    collectionName: string
+    private readonly collectionName: string
   ) {
-    this.collectionRef = collection(db, collectionName);
+    this.collectionRef = db.collection(this.collectionName);
   }
 
   async create(data: Omit<T, "id">): Promise<void> {
-    await adminDb.collection("users").add(data);
+    await this.collectionRef.add(data);
   }
 
   async findUnique({ field, value }: FindUnique<T>): Promise<T | null> {
-    const usersRef = adminDb.collection(this.collectionRef.path);
-    const q = usersRef.where(field as string, "==", value);
-    const snap = await q.get();
-    if (snap.empty) return null;
-    const docSnap = snap.docs[0];
-    return { id: docSnap.id, ...docSnap.data() } as T;
+    const snapshot = await this.collectionRef.where(field as string, "==", value).limit(1).get();
+    if (snapshot.empty) return null;
+
+    const doc = snapshot.docs[0];
+    return { id: doc.id, ...doc.data() } as T;
   }
 
   async findMany({ filters }: FindMany<T>): Promise<T[]> {
-    const constraints = Object.entries(filters).map(([field, value]) =>
-      where(field, "==", value)
-    );
+    let queryRef: FirebaseFirestore.Query = this.collectionRef;
+    for (const [field, value] of Object.entries(filters)) {
+      queryRef = queryRef.where(field, "==", value);
+    }
 
-    const q = query(this.collectionRef, ...constraints);
-    const snap = await getDocs(q);
-    return snap.docs.map((docSnap) => ({
-      id: docSnap.id,
-      ...docSnap.data(),
+    const snapshot = await queryRef.get();
+    return snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
     })) as T[];
   }
 
   async updateOne({ id, data }: UpdateOne<T>): Promise<boolean> {
-    const docRef = doc(this.collectionRef, id);
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _, ...rest } = data;
-    await updateDoc(docRef, rest);
+    const docRef = this.collectionRef.doc(id);
+    await docRef.update(data);
     return true;
   }
 
   async updateMany({ filters, data }: UpdateMany<T>): Promise<boolean> {
-    const constraints = Object.entries(filters).map(([field, value]) =>
-      where(field, "==", value)
-    );
+    let queryRef: FirebaseFirestore.Query = this.collectionRef;
+    for (const [field, value] of Object.entries(filters)) {
+      queryRef = queryRef.where(field, "==", value);
+    }
 
-    const q = query(this.collectionRef, ...constraints);
-    const snap = await getDocs(q);
-    if (snap.empty) return false;
+    const snapshot = await queryRef.get();
+    if (snapshot.empty) return false;
 
-    const batch = writeBatch(this.db);
-
-    const safeData = Object.fromEntries(
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      Object.entries(data).filter(([_, v]) => v !== undefined)
-    );
-
-    snap.forEach((docSnap) => {
-      const ref = doc(this.db, this.collectionRef.path, docSnap.id);
-      batch.update(ref, safeData);
+    const batch = this.db.batch();
+    snapshot.forEach((doc) => {
+      batch.update(doc.ref, data as T);
     });
 
     await batch.commit();
-
     return true;
   }
 
   async findUserWithActiveSubscription({
     field,
     value,
-  }: FindUserWithActiveSubscription<T>) {
-    const usersRef = collection(this.db, "users");
-    const userQuery = query(usersRef, where(field as string, "==", value));
-    const userSnap = await getDocs(userQuery);
-    const getByIndex = 0;
+  }: FindUserWithActiveSubscription<T>): Promise<T | null> {
+    const usersRef = this.db.collection("users");
+    const userSnap = await usersRef.where(field as string, "==", value).limit(1).get();
 
     if (userSnap.empty) return null;
 
-    const userDoc = userSnap.docs[getByIndex];
+    const userDoc = userSnap.docs[0];
     const userData = userDoc.data() as { stripe_customer_id: string };
 
-    const subsRef = collection(this.db, "subscriptions");
-    const subQuery = query(
-      subsRef,
-      where("user_id", "==", userData.stripe_customer_id),
-      where("status", "==", "active")
-    );
-    const subSnap = await getDocs(subQuery);
+    const subsRef = this.db.collection("subscriptions");
+    const subSnap = await subsRef
+      .where("user_id", "==", userData.stripe_customer_id)
+      .where("status", "==", "active")
+      .limit(1)
+      .get();
 
     if (subSnap.empty) return null;
 
-    const subscriptionDoc = subSnap.docs[getByIndex];
-
-    return { ...subscriptionDoc.data() } as T;
+    const subDoc = subSnap.docs[0];
+    return { id: subDoc.id, ...subDoc.data() } as T;
   }
 }
