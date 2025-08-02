@@ -3,7 +3,6 @@ import {
   query,
   where,
   getDocs,
-  addDoc,
   updateDoc,
   doc,
   writeBatch,
@@ -18,6 +17,7 @@ import type {
   UpdateMany,
   FindUserWithActiveSubscription,
 } from ".";
+import { adminDb } from "@/lib/firebaseAdmin";
 
 export class FirebaseRepository<T extends { id: string }>
   implements IFirebaseRepository<T>
@@ -32,12 +32,13 @@ export class FirebaseRepository<T extends { id: string }>
   }
 
   async create(data: Omit<T, "id">): Promise<void> {
-    await addDoc(this.collectionRef, data);
+    await adminDb.collection("users").add(data);
   }
 
   async findUnique({ field, value }: FindUnique<T>): Promise<T | null> {
-    const q = query(this.collectionRef, where(field as string, "==", value));
-    const snap = await getDocs(q);
+    const usersRef = adminDb.collection(this.collectionRef.path);
+    const q = usersRef.where(field as string, "==", value);
+    const snap = await q.get();
     if (snap.empty) return null;
     const docSnap = snap.docs[0];
     return { id: docSnap.id, ...docSnap.data() } as T;

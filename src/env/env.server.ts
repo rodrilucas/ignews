@@ -20,6 +20,8 @@ const envSchema = z.object({
   FIREBASE_AUTH_DOMAIN: z.string(),
   FIREBASE_STORAGE_BUCKET: z.string(),
   FIREBASE_PROJECT_ID: z.string(),
+  FIREBASE_CLIENT_EMAIL: z.string(),
+  FIREBASE_PRIVATE_KEY: z.string(),
 
   PRISMIC_ACCESS_TOKEN: z.string()
 });
