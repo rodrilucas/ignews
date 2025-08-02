@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import NextAuth from "next-auth";
 import type { JWT as DefaultJWT } from "next-auth/jwt";
 import type { User } from "next-auth";

@@ -58,6 +58,7 @@ export class FirebaseRepository<T extends { id: string }>
 
   async updateOne({ id, data }: UpdateOne<T>): Promise<boolean> {
     const docRef = doc(this.collectionRef, id);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { id: _, ...rest } = data;
     await updateDoc(docRef, rest);
     return true;
@@ -73,7 +74,9 @@ export class FirebaseRepository<T extends { id: string }>
     if (snap.empty) return false;
 
     const batch = writeBatch(this.db);
+
     const safeData = Object.fromEntries(
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
       Object.entries(data).filter(([_, v]) => v !== undefined)
     );
 

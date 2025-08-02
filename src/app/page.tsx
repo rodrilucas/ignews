@@ -4,7 +4,7 @@ import { SubscribeButton } from "@/components/SubscribeButton";
 import { loadFormattedProduct } from "@/services/load-formatted-product";
 import { env } from "@/env/env.server";
 
-export const revalidate = 60 * 60 * 24;
+export const revalidate = 86400;
 
 export default async function Home() {
   const product = await loadFormattedProduct(env.STRIPE_PRICE);

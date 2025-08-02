@@ -10,6 +10,7 @@ type SubscribeButtonProps = {
   priceId: string;
 };
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export function SubscribeButton({ priceId }: SubscribeButtonProps) {
   const { data: session, status } = useSession();
   const router = useRouter();

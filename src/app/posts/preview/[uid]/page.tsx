@@ -19,7 +19,7 @@ export async function generateStaticParams() {
 }
 
 export const dynamicParams = true;
-export const revalidate = 60 * 30;
+export const revalidate = 1800;
 
 export default async function PostPagePreview({
   params,
