@@ -20,39 +20,54 @@ export const authOptions: NextAuthOptions = {
   secret: env.AUTH_SECRET,
   callbacks: {
     async session({ session }) {
+      if (!session?.user?.email) {
+        return session; 
+      }
+
       const userFirebaseRepository = makeFirebaseUserRepository();
 
-      if (!session.user || !session.user.email) {
-        throw new Error("Usuário não autenticado ou email não encontrado..");
+      try {
+        const subscription =
+          (await userFirebaseRepository.findUserWithActiveSubscription({
+            field: "email",
+            value: session.user.email,
+          })) as Subscription;
+
+        if (subscription) {
+          session.subscription = { ...subscription };
+        }
+      } catch (error) {
+        console.error("Erro ao buscar inscrição ativa:", error);
       }
 
-      const subscription =
-        await userFirebaseRepository.findUserWithActiveSubscription({
-          field: "email",
-          value: session.user.email,
-        }) as Subscription;
-
-      if (subscription) {
-        session.subscription = {
-          ...subscription,
-        };
-      }
       return session;
     },
+
     async signIn({ user }) {
       if (!user || !user.email) {
         throw new Error("Usuário não existe ou email não encontrado.");
       }
 
+      const userFirebaseRepository = makeFirebaseUserRepository();
+
       try {
-        await add({
-          data: {
-            email: user.email,
-          },
+        const existingUser = await userFirebaseRepository.findUnique({
+          field: "email",
+          value: user.email,
         });
+
+        if (!existingUser) {
+          await add({
+            data: {
+              email: user.email,
+            },
+          });
+        }
+
         return true;
       } catch (err) {
-        throw err;
+        console.error("Erro ao verificar ou adicionar usuário:", err);
+        return false;
       }
     },
   },
